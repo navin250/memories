@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#7c3aed">
+  <title>Our Little Memory Gallery 💜</title>
+  <style>
+    :root {
+      --ink: #32164a;
+      --muted: #725c82;
+      --purple: #7c3aed;
+      --purple-dark: #5b21b6;
+      --lavender: #f2eaff;
+      --card: rgba(255, 255, 255, .9);
+      --shadow: 0 18px 50px rgba(74, 35, 110, .13);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: Inter, ui-rounded, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 8% 18%, #ead9ff 0, transparent 23rem),
+        linear-gradient(180deg, #fbf8ff, #f5edff 48%, #fff 100%);
+    }
+
+    button, a { font: inherit; }
+
+    .hero {
+      min-height: 82vh;
+      display: grid;
+      place-items: center;
+      padding: 32px 20px;
+      text-align: center;
+      background:
+        linear-gradient(135deg, rgba(56, 25, 84, .72), rgba(124, 58, 237, .35)),
+        url("assets/thumbs/hero.jpg") center / cover;
+    }
+
+    .hero-card {
+      width: min(680px, 100%);
+      padding: clamp(30px, 7vw, 58px);
+      border: 1px solid rgba(255, 255, 255, .45);
+      border-radius: 34px;
+      color: white;
+      background: rgba(47, 20, 67, .48);
+      box-shadow: 0 25px 75px rgba(26, 10, 38, .3);
+      backdrop-filter: blur(13px);
+    }
+
+    .eyebrow { margin: 0 0 12px; letter-spacing: .13em; text-transform: uppercase; font-size: .78rem; }
+    h1 { margin: 0; font-size: clamp(2.5rem, 8vw, 5.25rem); line-height: .98; }
+    .hero p:not(.eyebrow) { margin: 22px auto 30px; max-width: 520px; line-height: 1.7; }
+    .hero a {
+      display: inline-block;
+      padding: 13px 24px;
+      border-radius: 999px;
+      color: var(--purple-dark);
+      background: white;
+      text-decoration: none;
+      font-weight: 750;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .16);
+    }
+
+    main { width: min(1180px, calc(100% - 28px)); margin: auto; padding: 70px 0 90px; }
+    .section-heading { text-align: center; margin-bottom: 38px; }
+    .section-heading h2 { margin: 0 0 10px; font-size: clamp(2rem, 6vw, 3.4rem); }
+    .section-heading p { margin: 0; color: var(--muted); line-height: 1.65; }
+
+    .album { margin: 0 0 58px; scroll-margin-top: 20px; }
+    .album-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin: 0 4px 18px; }
+    .album h3 { margin: 0; font-size: clamp(1.45rem, 4vw, 2.05rem); text-transform: capitalize; }
+    .count { flex: 0 0 auto; color: var(--purple); font-weight: 700; font-size: .88rem; }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 16px;
+    }
+
+    .photo-card, .video-card {
+      margin: 0;
+      overflow: hidden;
+      border: 1px solid rgba(124, 58, 237, .12);
+      border-radius: 22px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+
+    .photo-card { cursor: zoom-in; transition: transform .25s ease, box-shadow .25s ease; }
+    .photo-card:hover { transform: translateY(-5px); box-shadow: 0 24px 60px rgba(74, 35, 110, .2); }
+    .image-wrap { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: #e9ddf5; }
+    .photo-card img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .45s ease; }
+    .photo-card:hover img { transform: scale(1.035); }
+    figcaption, .video-card p { margin: 0; min-height: 50px; padding: 13px 14px 15px; color: #4f365f; font-size: .9rem; line-height: 1.35; }
+
+    .photo-card.unavailable { cursor: default; }
+    .photo-card.unavailable .image-wrap::after {
+      content: "Photo unavailable\A Please check this file";
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      text-align: center;
+      color: #694783;
+      font-weight: 700;
+      font-size: .78rem;
+      line-height: 1.65;
+      background: linear-gradient(145deg, #efe5fb, #dfcdf4);
+    }
+
+    .video-section { margin-top: 90px; }
+    .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 20px; }
+    .video-card { padding: 11px; }
+    .video-card video { width: 100%; max-height: 480px; display: block; border-radius: 15px; background: #1d1028; }
+    .video-card p { text-align: center; }
+
+    .ending { padding: 75px 20px; text-align: center; color: white; background: linear-gradient(135deg, #4c1d95, #8b5cf6); }
+    .ending h2 { margin: 0 0 15px; font-size: clamp(2rem, 7vw, 3.5rem); }
+    .ending p { max-width: 630px; margin: auto; line-height: 1.75; }
+
+    .lightbox {
+      position: fixed;
+      z-index: 10;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 58px 72px;
+      color: white;
+      background: rgba(21, 8, 31, .95);
+      backdrop-filter: blur(10px);
+    }
+    .lightbox.open { display: grid; }
+    .lightbox figure { margin: 0; text-align: center; }
+    .lightbox img { max-width: 86vw; max-height: 75vh; border-radius: 18px; box-shadow: 0 30px 80px rgba(0,0,0,.42); }
+    .lightbox figcaption { color: white; font-size: 1rem; }
+    .lightbox button {
+      position: fixed;
+      border: 0;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      color: white;
+      background: rgba(255,255,255,.16);
+      cursor: pointer;
+      font-size: 1.7rem;
+    }
+    .close { top: 18px; right: 18px; }
+    .previous { left: 16px; top: 50%; }
+    .next { right: 16px; top: 50%; }
+
+    @media (max-width: 620px) {
+      .hero { min-height: 72vh; }
+      main { width: min(100% - 20px, 1180px); padding-top: 52px; }
+      .photo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .photo-card, .video-card { border-radius: 16px; }
+      figcaption { padding: 10px; font-size: .79rem; }
+      .album { margin-bottom: 42px; }
+      .lightbox { padding: 56px 16px; }
+      .lightbox img { max-width: 94vw; }
+    }
+
+    /* The scrapbook layer */
+    body::before {
+      content: "";
+      position: fixed;
+      z-index: -1;
+      inset: 0;
+      pointer-events: none;
+      opacity: .28;
+      background-image: radial-gradient(#8154a6 0.7px, transparent 0.7px);
+      background-size: 18px 18px;
+      mask-image: linear-gradient(to bottom, transparent, black 16%, black 80%, transparent);
+    }
+
+    .scroll-progress {
+      position: fixed;
+      z-index: 30;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      transform: scaleX(0);
+      transform-origin: left;
+      background: linear-gradient(90deg, #f0abfc, #8b5cf6, #f472b6);
+      box-shadow: 0 2px 14px #c084fc;
+    }
+
+    .topbar {
+      position: absolute;
+      z-index: 4;
+      top: 0;
+      left: 50%;
+      width: min(1180px, calc(100% - 32px));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 0;
+      color: white;
+      transform: translateX(-50%);
+    }
+
+    .brand { font-family: Georgia, serif; font-size: 1.08rem; font-style: italic; letter-spacing: .03em; }
+    .topbar a { color: white; text-decoration: none; font-size: .88rem; font-weight: 700; }
+
+    .hero { position: relative; min-height: 94vh; isolation: isolate; overflow: hidden; }
+    .hero::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      background: radial-gradient(circle at center, transparent 0 20%, rgba(25, 8, 40, .28) 78%);
+    }
+
+    .hero-card { position: relative; z-index: 2; animation: heroArrival .9s cubic-bezier(.2,.8,.2,1) both; }
+    .hero-card::after {
+      content: "always, in all ways";
+      position: absolute;
+      right: 28px;
+      bottom: 18px;
+      color: #f5d0fe;
+      font-family: "Segoe Print", "Bradley Hand", cursive;
+      font-size: .8rem;
+      transform: rotate(-4deg);
+    }
+
+    .hero-heart { display: inline-block; filter: drop-shadow(0 5px 12px rgba(0,0,0,.3)); animation: heartbeat 2.2s ease-in-out infinite; }
+    .hero-scroll { position: absolute; z-index: 3; bottom: 18px; left: 50%; color: white; opacity: .78; transform: translateX(-50%); font-size: .76rem; letter-spacing: .16em; text-transform: uppercase; }
+    .hero-scroll::after { content: ""; display: block; width: 1px; height: 32px; margin: 9px auto 0; background: linear-gradient(white, transparent); }
+
+    .polaroid {
+      position: absolute;
+      z-index: 1;
+      width: clamp(120px, 15vw, 205px);
+      padding: 8px 8px 28px;
+      background: #fffdf9;
+      border-radius: 3px;
+      box-shadow: 0 22px 45px rgba(24, 8, 35, .35);
+      pointer-events: none;
+      animation: polaroidFloat 6s ease-in-out infinite;
+    }
+    .polaroid img { width: 100%; aspect-ratio: 1; display: block; object-fit: cover; }
+    .polaroid::after { content: attr(data-note); position: absolute; inset: auto 8px 6px; color: #5f406f; text-align: center; font-family: "Segoe Print", cursive; font-size: clamp(.62rem, 1vw, .82rem); }
+    .polaroid.one { top: 17%; left: 4%; transform: rotate(-9deg); }
+    .polaroid.two { right: 4%; bottom: 13%; transform: rotate(8deg); animation-delay: -2.5s; }
+
+    .love-note {
+      position: relative;
+      max-width: 760px;
+      margin: 0 auto 70px;
+      padding: 30px clamp(24px, 6vw, 56px);
+      text-align: center;
+      border-radius: 2px;
+      background: #fffdf8;
+      box-shadow: 0 18px 60px rgba(67, 31, 92, .1);
+      transform: rotate(-.5deg);
+    }
+    .love-note::before { content: "“"; position: absolute; top: -22px; left: 24px; color: #d8b4fe; font: 6rem/1 Georgia, serif; }
+    .love-note p { margin: 0; color: #5d416e; font: italic clamp(1.05rem, 3vw, 1.35rem)/1.8 Georgia, serif; }
+    .love-note span { display: block; margin-top: 13px; color: var(--purple); font-family: "Segoe Print", cursive; font-size: .85rem; }
+
+    .album-nav {
+      position: sticky;
+      z-index: 5;
+      top: 12px;
+      display: flex;
+      gap: 8px;
+      max-width: 100%;
+      margin: 0 auto 60px;
+      padding: 10px;
+      overflow-x: auto;
+      border: 1px solid rgba(124,58,237,.12);
+      border-radius: 999px;
+      background: rgba(255,255,255,.78);
+      box-shadow: 0 12px 35px rgba(67,31,92,.12);
+      justify-content: center;
+      flex-wrap: wrap;
+      overflow: visible;
+      background: rgba(255,255,255,.96);
+      scrollbar-width: none;
+    }
+    .album-nav::-webkit-scrollbar { display: none; }
+    .album-nav a { flex: 0 0 auto; padding: 9px 15px; border-radius: 999px; color: #674079; text-decoration: none; text-transform: capitalize; font-size: .82rem; font-weight: 750; transition: .2s; }
+    .album-nav a:hover { color: white; background: var(--purple); }
+
+    .album {
+      position: relative;
+      padding: clamp(18px, 4vw, 34px);
+      border: 1px solid rgba(124,58,237,.1);
+      border-radius: 32px;
+      background: linear-gradient(145deg, rgba(255,255,255,.8), rgba(248,242,255,.62));
+      box-shadow: 0 22px 70px rgba(75,35,104,.08);
+    }
+    .album::before { content: ""; position: absolute; top: -7px; left: 50%; width: 90px; height: 22px; background: rgba(233,213,255,.72); transform: translateX(-50%) rotate(-1deg); }
+    .album-head { align-items: center; justify-content: center; flex-direction: column; text-align: center; }
+    .album h3 { width: 100%; font-family: Georgia, serif; text-align: center; }
+    .album h3::before { content: "✦"; margin-right: 10px; color: #c084fc; font-size: .7em; }
+    .count { padding: 7px 12px; border-radius: 999px; background: #f1e8ff; }
+
+    .photo-grid { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 19px; }
+    .photo-card { width: 100%; flex: 0 1 205px; max-width: 225px; border: 8px solid white; border-bottom-width: 0; border-radius: 6px 6px 16px 16px; box-shadow: 0 13px 35px rgba(61,25,84,.14); }
+    .photo-card:nth-child(4n+1) { transform: rotate(-.55deg); }
+    .photo-card:nth-child(4n+3) { transform: rotate(.55deg); }
+    .photo-card:hover { transform: translateY(-7px) rotate(0); }
+    .image-wrap { aspect-ratio: 4 / 4.65; }
+    figcaption { min-height: 50px; display: grid; place-items: center; text-align: center; font-family: "Segoe Print", "Bradley Hand", cursive; }
+
+    .video-section { position: relative; padding: clamp(28px, 5vw, 55px); border-radius: 34px; background: linear-gradient(145deg, #32164a, #6d28d9); box-shadow: 0 25px 75px rgba(59,21,93,.23); }
+    .video-section .section-heading h2, .video-section .section-heading p { color: white; }
+    .video-card { background: rgba(255,255,255,.95); }
+
+    .ending { position: relative; overflow: hidden; padding-block: 100px; }
+    .ending::before, .ending::after { content: "♥"; position: absolute; color: rgba(255,255,255,.08); font-size: 18rem; }
+    .ending::before { left: -45px; bottom: -90px; transform: rotate(-18deg); }
+    .ending::after { right: -35px; top: -100px; transform: rotate(18deg); }
+    .ending-inner { position: relative; z-index: 1; max-width: 680px; margin: auto; }
+    .ending-mark { width: 58px; height: 58px; display: grid; place-items: center; margin: 28px auto 0; border-radius: 50%; color: #6d28d9; background: #f5d0fe; font-size: 1.5rem; box-shadow: 0 8px 22px rgba(30,10,45,.25); transform: rotate(-8deg); }
+
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @keyframes heroArrival { from { opacity: 0; transform: translateY(25px) scale(.98); } }
+    @keyframes heartbeat { 0%, 100% { transform: scale(1); } 12% { transform: scale(1.12); } 24% { transform: scale(1); } }
+    @keyframes polaroidFloat { 0%,100% { margin-top: 0; } 50% { margin-top: -12px; } }
+
+    @media (max-width: 850px) {
+      .polaroid { opacity: .62; width: 118px; }
+      .polaroid.one { top: 12%; left: -20px; }
+      .polaroid.two { right: -18px; bottom: 8%; }
+      .hero-card { max-width: 590px; }
+    }
+
+    @media (max-width: 620px) {
+      .topbar { padding-top: 17px; }
+      .hero { min-height: 88vh; }
+      .hero-card::after { display: none; }
+      .polaroid { width: 92px; padding: 5px 5px 21px; }
+      .polaroid.one { top: 10%; }
+      .polaroid.two { bottom: 8%; }
+      .hero-scroll { display: none; }
+      .love-note { margin-bottom: 45px; }
+      .album-nav { top: 7px; justify-content: center; margin-bottom: 42px; border-radius: 18px; }
+      .album { padding: 18px 10px 22px; border-radius: 24px; }
+      .album-head { padding-inline: 6px; }
+      .photo-grid { justify-content: center; gap: 10px; }
+      .photo-card { flex: 0 1 calc(50% - 5px); max-width: 185px; border-width: 5px; border-bottom-width: 0; }
+      .video-section { margin-inline: -4px; padding: 30px 12px; border-radius: 24px; }
+      body::before { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="scroll-progress" aria-hidden="true"></div>
+  <nav class="topbar" aria-label="Main navigation">
+    <span class="brand">N &amp; N</span>
+    <a href="#memories">Our memories ↓</a>
+  </nav>
+  <header class="hero">
+    <figure class="polaroid one" data-note="my favourite smile">
+      <img src="assets/thumbs/Fav smile.jpg" alt="" aria-hidden="true">
+    </figure>
+    <figure class="polaroid two" data-note="us, always">
+      <img src="assets/thumbs/First jog.jpg" alt="" aria-hidden="true">
+    </figure>
+    <div class="hero-card">
+      <p class="eyebrow">A little home for our memories</p>
+      <h1>For My Nire Chechii <span class="hero-heart">💜</span></h1>
+      <p>Every photo has its own tiny story.</p>
+      <a href="#memories">Open our memories</a>
+    </div>
+    <span class="hero-scroll">Scroll into our story</span>
+  </header>
+
+  <main id="memories">
+    <div class="section-heading">
+      <h2>Our Memory Albums</h2>
+      <p>Tap a photo to see it bigger.</p>
+    </div>
+    <aside class="love-note reveal">
+      <p>Some days become memories without warning. I’m glad so many of mine have you in them.</p>
+      <span>— kept here with love</span>
+    </aside>
+    <nav id="albumNav" class="album-nav" aria-label="Jump to an album"></nav>
+    <div id="albums"></div>
+
+    <section class="video-section reveal">
+      <div class="section-heading">
+        <h2>Video Moments 🎥</h2>
+        <p>The wonderfully silly moving memories.</p>
+      </div>
+      <div id="videos" class="video-grid"></div>
+    </section>
+  </main>
+
+  <footer class="ending">
+    <div class="ending-inner reveal">
+      <h2>For You, Maa 💜</h2>
+      <p>They may be photos and videos to everyone else, but to me they are little pieces of us that I never want to forget.</p>
+      <div class="ending-mark" aria-label="With love">N</div>
+    </div>
+  </footer>
+
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+    <button class="close" type="button" aria-label="Close">×</button>
+    <button class="previous" type="button" aria-label="Previous photo">‹</button>
+    <figure>
+      <img id="lightboxImage" alt="">
+      <figcaption id="lightboxCaption"></figcaption>
+    </figure>
+    <button class="next" type="button" aria-label="Next photo">›</button>
+  </div>
+
+  <script>
+    const albums = [
+      { name: "Highlights", files: [
+        "Fav smile.jpg", "First jog.jpg", "POV shoots.jpg",
+        "Unforgettable 18th June.jpg", "Walk date.jpg"
+      ]},
+      { name: "Chechiii", files: [
+        "Beautiful smile .jpg", "Cute gurl.jpg", "Fever gurl.jpg", "Frustrated gurl.jpg", "My princess .jpg",
+        "My princess 2.jpg", "My princess 3.jpg", "My princess 4.jpg", "photo_2026-06-27_01-12-24.jpg",
+        "Sampah gurl.jpg", "Your Victories I feel as mine.jpg"
+      ]},
+      { name: "Funny Moments", files: [
+        "1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg",
+        "6.jpg", "7.jpg", "8.jpg", "9.jpg", "10.jpg",
+        "Achchoo.jpg", "Illeche vaayan me.jpg", "Navin as Niresha .jpg",
+        "Niresha as kutty Navin.jpg", "Niresha as periye Navin.jpg", "Solo Tomotoo.jpg"
+      ]},
+      { name: "KALAM 6.0", files: ["1.jpg", "2.jpg", "3.jpg"] },
+      { name: "Kovil Date", files: ["1.jpg", "2.jpg"] },
+      { name: "Lestari", files: [
+        "1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg", "6.jpg", "7.jpg", "8.jpg"
+      ]},
+      { name: "Navinuu", files: [
+        "Handsome Navinuu.jpg", "Kudikaren Navinu.jpg", "Stressed Navinu.jpg", "Vibing with brownie .jpg"
+      ]},
+      { name: "Photos Together", files: [
+        "1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg"
+      ]},
+      { name: "Random", files: ["Sleepy brownie.jpg", "Us.jpg"] },
+      { name: "Tasik UTM", files: ["1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg", "6.jpg"] },
+      { name: "UTM Outing", files: [
+        "First jog.jpg", "K10 Festa.jpg", "Lunch Time.jpg", "Walk date.jpg"
+      ]}
+    ];
+
+    const videoFiles = [
+      "Busy Gurlll.MP4", "First video.MOV", "Heart in mande.MP4", "I kalah with you.mp4",
+      "Ice cream fight.MP4", "Irritating me.MOV", "Me trying to make you smile.MP4",
+      "Motte Niresha.MP4", "Munchi mele nalunggu.MP4", "Paithiyooo guys.MP4",
+      "Pandi mukku Niresha.MP4", "Red paithiyo.MOV", "Us in future.MP4", "Wooww.MP4",
+      "You acting normal after crying .MP4"
+    ];
+
+    const cleanName = name => name.replace(/\.[^.]+$/, "").trim();
+    const captionText = name => /^\d+$/.test(cleanName(name)) ? "" : cleanName(name);
+    const imagePath = (album, file) => album === "Highlights" ? `assets/${file}` : `assets/${album}/${file}`;
+    const thumbnailPath = (album, file) => album === "Highlights" ? `assets/thumbs/${file}` : `assets/thumbs/${album}/${file}`;
+    const photos = albums.flatMap(album => album.files.map(file => ({
+      album: album.name,
+      file,
+      src: imagePath(album.name, file)
+    })));
+
+    const albumsRoot = document.getElementById("albums");
+    const albumNav = document.getElementById("albumNav");
+    let photoIndex = 0;
+
+    albums.forEach(album => {
+      const albumId = `album-${album.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+      const navLink = document.createElement("a");
+      navLink.href = `#${albumId}`;
+      navLink.textContent = album.name;
+      albumNav.appendChild(navLink);
+
+      const section = document.createElement("section");
+      section.id = albumId;
+      section.className = "album reveal";
+      section.innerHTML = `
+        <div class="album-head">
+          <h3>${album.name}</h3>
+          <span class="count">${album.files.length} ${album.files.length === 1 ? "memory" : "memories"}</span>
+        </div>
+        <div class="photo-grid"></div>`;
+
+      const grid = section.querySelector(".photo-grid");
+      album.files.forEach(file => {
+        const index = photoIndex++;
+        const card = document.createElement("figure");
+        card.className = "photo-card";
+        card.innerHTML = `
+          <div class="image-wrap"><img src="${thumbnailPath(album.name, file)}" alt="${cleanName(file) || album.name}" loading="lazy" decoding="async"></div>
+          <figcaption>${captionText(file)}</figcaption>`;
+        const image = card.querySelector("img");
+        image.addEventListener("error", () => {
+          const fallback = imagePath(album.name, file);
+          if (image.dataset.fallbackTried === "true") {
+            card.classList.add("unavailable");
+            return;
+          }
+          image.dataset.fallbackTried = "true";
+          image.src = fallback;
+        });
+        card.addEventListener("click", () => {
+          if (!card.classList.contains("unavailable")) openLightbox(index);
+        });
+        grid.appendChild(card);
+      });
+      albumsRoot.appendChild(section);
+    });
+
+    const videosRoot = document.getElementById("videos");
+    videoFiles.forEach(file => {
+      const card = document.createElement("article");
+      card.className = "video-card";
+      card.innerHTML = `
+        <video controls preload="metadata"><source src="assets/videos/${file}">Your browser cannot play this video.</video>
+        <p>${captionText(file)}</p>`;
+      videosRoot.appendChild(card);
+    });
+
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImage = document.getElementById("lightboxImage");
+    const lightboxCaption = document.getElementById("lightboxCaption");
+    let currentIndex = 0;
+
+    function showCurrent() {
+      const photo = photos[currentIndex];
+      lightboxImage.src = photo.src;
+      lightboxImage.alt = cleanName(photo.file) || photo.album;
+      lightboxCaption.textContent = captionText(photo.file) ? `${photo.album} - ${captionText(photo.file)}` : "";
+    }
+
+    function openLightbox(index) {
+      currentIndex = index;
+      showCurrent();
+      lightbox.classList.add("open");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove("open");
+      document.body.style.overflow = "";
+    }
+
+    function move(direction) {
+      currentIndex = (currentIndex + direction + photos.length) % photos.length;
+      showCurrent();
+    }
+
+    lightbox.querySelector(".close").addEventListener("click", closeLightbox);
+    lightbox.querySelector(".previous").addEventListener("click", () => move(-1));
+    lightbox.querySelector(".next").addEventListener("click", () => move(1));
+    lightbox.addEventListener("click", event => { if (event.target === lightbox) closeLightbox(); });
+    document.addEventListener("keydown", event => {
+      if (!lightbox.classList.contains("open")) return;
+      if (event.key === "Escape") closeLightbox();
+      if (event.key === "ArrowLeft") move(-1);
+      if (event.key === "ArrowRight") move(1);
+    });
+
+    const progress = document.querySelector(".scroll-progress");
+    let progressFrame = 0;
+    const updateProgress = () => {
+      if (progressFrame) return;
+      progressFrame = requestAnimationFrame(() => {
+        const available = document.documentElement.scrollHeight - window.innerHeight;
+        const amount = available > 0 ? window.scrollY / available : 0;
+        progress.style.transform = `scaleX(${amount})`;
+        progressFrame = 0;
+      });
+    };
+    document.addEventListener("scroll", updateProgress, { passive: true });
+    updateProgress();
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion || !("IntersectionObserver" in window)) {
+      document.querySelectorAll(".reveal").forEach(element => element.classList.add("visible"));
+    } else {
+      const revealObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: .08, rootMargin: "0px 0px -30px" });
+      document.querySelectorAll(".reveal").forEach(element => revealObserver.observe(element));
+    }
+  </script>
+</body>
+</html>
